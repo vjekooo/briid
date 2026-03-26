@@ -1,0 +1,41 @@
+---
+export interface CardArticle {
+    title: string
+    date: string
+    url: string
+    image: string
+    readingTime: string
+}
+
+interface Props {
+    article: CardArticle
+}
+
+const { article } = Astro.props
+
+const formatDate = (date: string) => {
+    return new Date(date)
+        .toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        })
+        .replace(/\//g, '.')
+}
+---
+
+<div class="w-full flex flex-col bg-gray-50 p-4 rounded-lg">
+    <a href={article.url} class="flex gap-3">
+        <div class="flex flex-col gap-2">
+            <p class="pt-1 text-gray-900 h5 text-sm min-h-[52px]">
+                {article.title}
+            </p>
+            <div class="flex flex-col">
+                <p class="text-gray-600 text-sm">{formatDate(article.date)}</p>
+                <p class="text-gray-600 text-sm">
+                    {`${article.readingTime} min` || '5 min'}
+                </p>
+            </div>
+        </div>
+    </a>
+</div>

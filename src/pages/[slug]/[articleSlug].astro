@@ -1,0 +1,113 @@
+---
+import {contentfulClient, type Page} from '../../lib/contentful'
+import { renderRichText } from '../../utils/contentful'
+import Header from "../../components/Header.astro"
+import Author from '../../components/Author.astro'
+import Footer from '../../components/Footer.astro'
+
+import "../../styles/global.css"
+
+interface Props {
+  slug: string
+  articleSlug: string
+}
+
+export async function getStaticPaths() {
+  const pagesResponse = await contentfulClient.getEntries<Page>({
+    content_type: 'page',
+    order: 'fields.position',
+  })
+
+  return pagesResponse.items.flatMap((page: any) =>
+      (page.fields.articles || []).map((article: any) => ({
+        params: {
+          slug: page.fields.slug,
+          articleSlug: article.fields.slug,
+        },
+        props: {
+          slug: article.fields.slug,
+          pageSlug: page.fields.slug,
+        },
+      }))
+  )
+}
+
+const { slug, articleSlug } = Astro.props as Props
+
+const articleResponse = await contentfulClient.getEntries({
+  content_type: 'article',
+  'fields.slug': articleSlug,
+  limit: 1,
+})
+
+const articleEntry = articleResponse.items[0]
+
+if (!articleEntry) {
+  return Astro.redirect('/404')
+}
+
+const article = {
+  title: articleEntry.fields.title,
+  slug: articleEntry.fields.slug,
+  date: articleEntry.fields.date,
+  image: articleEntry.fields.image,
+  author: articleEntry.fields.author,
+  text: articleEntry.fields.text,
+  readingTime: articleEntry.fields.readingTime,
+}
+
+const richTextHtml = article.text?.raw
+    ? renderRichText(JSON.parse(article.text.raw))
+    : ''
+
+const imageUrl = article.image?.fields?.file?.url?.startsWith('//')
+    ? `https:${article.image.fields.file.url}`
+    : article.image?.fields?.file?.url
+---
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BRIID - {article.title}</title>
+  <meta name="description" content={article.title} />
+</head>
+<body>
+<section class="bg-white">
+  <Header client:load />
+  <div class="container mx-auto flex items-center flex-wrap pt-4 pb-12">
+    <div class="grid grid-cols-1 md:grid-cols-[70%_30%] gap-4 w-full">
+      <div class="px-6 flex flex-col gap-4">
+        {imageUrl && (
+            <div class="w-full">
+              <img src={imageUrl} alt={article.title} class="w-full h-auto" />
+            </div>
+        )}
+        {article.author && <Author author={article.author.fields} client:load />}
+        <div set:html={richTextHtml} />
+      </div>
+    </div>
+  </div>
+  <Footer />
+</section>
+</body>
+</html>
+
+<!--<script>-->
+<!--  async function trackView() {-->
+<!--    try {-->
+<!--      const slug = window.location.pathname.split('/').pop()-->
+<!--      if (slug) {-->
+<!--        await fetch('/api/track-view', {-->
+<!--          method: 'POST',-->
+<!--          headers: { 'Content-Type': 'application/json' },-->
+<!--          body: JSON.stringify({ slug }),-->
+<!--        })-->
+<!--      }-->
+<!--    } catch (error) {-->
+<!--      console.error('Failed to track view:', error)-->
+<!--    }-->
+<!--  }-->
+
+<!--  trackView()-->
+<!--</script>-->

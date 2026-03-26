@@ -1,0 +1,124 @@
+---
+import Card from "../components/Card.astro"
+import Footer from "../components/Footer.astro"
+import Header from "../components/Header.astro"
+import Hero from "../components/Hero.astro"
+import { contentfulClient, type Page } from "../lib/contentful"
+
+import "../styles/global.css"
+
+interface Props {
+  page: {
+    title: string
+    slug: string
+    articles: any[]
+  }
+}
+
+export async function getStaticPaths() {
+  const pagesResponse = await contentfulClient.getEntries<Page>({
+    content_type: "page",
+    order: "fields.position",
+  })
+
+  return pagesResponse.items.map((item) => ({
+    params: {
+      slug: item.fields.slug,
+    },
+    props: {
+      page: {
+        title: item.fields.title,
+        slug: item.fields.slug,
+        articles: item.fields.articles || [],
+      },
+    },
+  }))
+}
+
+const { page } = Astro.props as Props
+
+console.log('page:', page)
+
+const pagesResponse = await contentfulClient.getEntries<Page>({
+  content_type: "page",
+  order: "fields.position",
+})
+
+const pages = pagesResponse.items.map((item) => ({
+  slug: item.fields.slug,
+  title: item.fields.title,
+  position: item.fields.position,
+  articles: item.fields.articles || [],
+}))
+
+const currentSlug = page.slug
+
+const heroArticles = page.articles?.map((article: any) => ({
+  title: article.fields.title,
+  url: `/${page.slug}/${article.fields.slug}`,
+  date: article.fields.date,
+  image: article.fields.image?.fields?.file?.url?.startsWith("//")
+      ? `https:${article.fields.image.fields.file.url}`
+      : article.fields.image?.fields?.file?.url || "",
+}))
+
+---
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BRIID - {page.title}</title>
+</head>
+<body>
+<section class="bg-white">
+  <Header />
+  <div class="w-full">
+    <Hero items={heroArticles}  />
+  </div>
+
+  <div class="container mx-auto flex items-center flex-wrap pt-4 pb-12 px-6">
+    <div class="hidden md:block">
+      <nav class="w-full flex gap-2 py-12 top-0">
+        {pages.map((item, index) => {
+          const cleanSlug = `/${item.slug.replace(/^\/+/, "")}`
+
+          return (
+              <div>
+                <a
+                    href={cleanSlug}
+                    class={`text-3xl uppercase ${
+                        currentSlug === item.slug ? "text-black" : "text-gray-300"
+                    }`}
+                >
+                  {item.title} {index === pages.length - 1 ? "" : "/"}
+                </a>
+              </div>
+          )
+        })}
+      </nav>
+    </div>
+
+    <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {pages.find((page) => page.slug === currentSlug)?.articles?.map((article: any) => {
+        return (
+            <Card
+                article={{
+                  title: article.fields.title,
+                  url: `/${page.slug}/${article.fields.slug}`,
+                  date: article.fields.date,
+                  image: article.fields.image?.fields?.file?.url?.startsWith("//")
+                      ? `https:${article.fields.image.fields.file.url}`
+                      : article.fields.image?.fields?.file?.url || "",
+                  readingTime: article.fields.readingTime || "5 min",
+                }}
+            />
+        )
+      })}
+    </div>
+  </div>
+
+  <Footer />
+</section>
+</body>
+</html>

@@ -1,0 +1,197 @@
+---
+import Card from '../components/Card.astro'
+import Footer from '../components/Footer.astro'
+import Header from '../components/Header.astro'
+import Hero from '../components/Hero.astro'
+import TextCard from '../components/TextCard.astro'
+import {type Article, contentfulClient, type Page} from '../lib/contentful'
+
+import "../styles/global.css";
+
+// Fetch all pages
+const pagesResponse = await contentfulClient.getEntries<Page>({
+  content_type: 'page',
+  order: 'fields.position',
+})
+
+const pages = pagesResponse.items.map((item: any) => ({
+  slug: item.fields.slug,
+  title: item.fields.title,
+  position: item.fields.position,
+  articles: item.fields.articles || [],
+}))
+
+// Fetch featured articles
+const featuredResponse = await contentfulClient.getEntries<Article>({
+  content_type: 'article',
+  limit: 3,
+  order: '-fields.date',
+})
+
+const featuredArticles = featuredResponse.items.map((item: any) => ({
+  slug: item.fields.slug,
+  title: item.fields.title,
+  date: item.fields.date,
+  image: item.fields.image,
+  page: item.fields.page,
+  readingTime: item.fields.readingTime,
+}))
+
+// Fetch most read articles
+const mostReadResponse = await contentfulClient.getEntries<Article>({
+  content_type: 'article',
+  limit: 3,
+  order: '-fields.views',
+  'fields.views[gt]': 0,
+})
+
+const mostReadArticles = mostReadResponse.items.map((item: any) => ({
+  slug: item.fields.slug,
+  title: item.fields.title,
+  date: item.fields.date,
+  image: item.fields.image,
+  readingTime: item.fields.readingTime,
+  page: item.fields.page,
+  views: item.fields.views,
+}))
+
+const heroArticles = featuredArticles.map((article) => ({
+  title: article.title,
+  url: `/${article.page.fields.slug}/${article.slug}`,
+  date: article.date,
+  image: article.image?.fields?.file?.url?.startsWith('//')
+      ? `https:${article.image.fields.file.url}`
+      : article.image?.fields?.file?.url || '',
+}))
+
+const mobileLinks = pages.map((page) => ({
+  title: page.title,
+  url: page.slug,
+}))
+---
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BRIID - Your Premier Source for Industry News and Insights</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link
+      href="https://fonts.googleapis.com/css2?family=Abel&family=Bebas+Neue&display=swap"
+      rel="stylesheet"
+  />
+  <meta
+      name="description"
+      content="Stay updated with the latest industry news, featured articles, and expert insights on BRIID. Discover trending topics and in-depth analysis."
+  />
+  <meta
+      name="keywords"
+      content="industry news, insights, articles, analysis, BRIID"
+  />
+  <meta property="og:title" content="BRIID - Industry News and Insights" />
+  <meta
+      property="og:description"
+      content="Stay updated with the latest industry news, featured articles, and expert insights."
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://briid.magazine.com" />
+  {featuredArticles[0]?.image?.fields?.file?.url && (
+      <meta
+          property="og:image"
+          content={`https:${featuredArticles[0].image.fields.file.url}`}
+      />
+  )}
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://briid.magazine.com" />
+</head>
+<body>
+<main>
+  <div
+      class="carousel relative container mx-auto flex items-center flex-wrap"
+      style={{ maxWidth: '1600px' }}
+  >
+    <Header mobileLinks={mobileLinks} client:load />
+    <div class="w-full">
+      <Hero items={heroArticles} client:load />
+    </div>
+  </div>
+
+  <section class="bg-white hidden md:block">
+    <div class="container mx-auto pt-4">
+      <div class="w-full top-0 px-6 py-12 flex gap-3">
+        {pages.map((page, index) => (
+            <div class="">
+              <a href={page.slug} class="text-3xl uppercase h5">
+                {page.title} {index === pages.length - 1 ? '' : '/'}
+              </a>
+            </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-4">
+    <div class="container mx-auto pt-4">
+      <div class="md:w-2/3 top-0 px-6 py-1">
+        <div class="w-full container mx-auto flex items-center justify-between mt-0 py-4">
+          <div class="tracking-wide no-underline hover:no-underline text-gray-800 text-xl uppercase h5">
+            Najčitanije
+          </div>
+        </div>
+        <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {mostReadArticles?.map((article: any) => (
+              <TextCard
+                  article={{
+                    title: article.title,
+                    url: `/${article.page.fields.slug}/${article.slug}`,
+                    date: article.date,
+                    image: article.image?.fields?.file?.url?.startsWith('//')
+                        ? `https:${article.image.fields.file.url}`
+                        : article.image?.fields?.file?.url || '',
+                    readingTime: article.readingTime,
+                  }}
+                  client:load
+              />
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white">
+    <div class="container mx-auto pt-4 pb-12">
+      <div class="w-full top-0 px-6 py-1 flex flex-col gap-3">
+        {pages.map((page) => (
+            <div class="w-full flex flex-col">
+              <div class="w-full container mx-auto flex items-center justify-between mt-0 py-4">
+                <div class="tracking-wide no-underline hover:no-underline text-gray-800 text-3xl h5 uppercase">
+                  <a href={page.slug}>{page.title}</a>
+                </div>
+              </div>
+              <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {page?.articles?.map((article: any) => (
+                    <Card
+                        article={{
+                          title: article.fields.title,
+                          url: `${page.slug}/${article.fields.slug}`,
+                          date: article.fields.date,
+                          image: article.fields.image?.fields?.file?.url?.startsWith('//')
+                              ? `https:${article.fields.image.fields.file.url}`
+                              : article.fields.image?.fields?.file?.url || '',
+                          readingTime: article.fields.readingTime,
+                        }}
+                        client:load
+                    />
+                ))}
+              </div>
+            </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <Footer />
+</main>
+</body>
+</html>

@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@utility h1 {
+  font-size: 4rem;
+  font-weight: 400;
+  font-family: 'BebasNeue', sans-serif;
+  letter-spacing: 1px;
+}
+
+@utility h3 {
+  font-size: 2rem;
+  font-weight: 400;
+  font-family: 'BebasNeue', sans-serif;
+}
+
+@utility h4 {
+  font-size: 2rem;
+  font-weight: 400;
+  font-family: 'BebasNeue', sans-serif;
+}
+
+@utility h5 {
+  font-size: 1rem;
+  font-weight: 400;
+  font-family: 'BebasNeue', sans-serif;
+}
+
+@layer base {
+  body {
+    font-family: 'Abel', sans-serif;
+  }
+}

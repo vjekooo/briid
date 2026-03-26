@@ -1,0 +1,19 @@
+---
+import HeroSlider, { type HeroItem } from './HeroSlider'
+import Stack from './Stack.astro'
+
+interface Props {
+    items: HeroItem[]
+    interval?: number
+}
+
+const { items, interval = 5000 } = Astro.props
+---
+
+<section
+        class="w-full mx-auto bg-nordic-gray-light flex md:pt-0 items-end bg-cover bg-right relative overflow-hidden"
+        style="height: 32rem;"
+        id="hero-section"
+>
+    <HeroSlider client:load items={items} interval={interval} />
+</section>

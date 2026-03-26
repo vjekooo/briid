@@ -1,0 +1,22 @@
+---
+type Size = 'sm' | 'base' | 'md' | 'lg' | 'xl'
+
+interface Props {
+  size?: Size
+  horizontal?: boolean
+}
+
+const { size = 'base', horizontal = false } = Astro.props
+
+const sizeMap: Record<Size, string> = {
+  sm: 'gap-2',
+  base: 'gap-4',
+  md: 'gap-6',
+  lg: 'gap-8',
+  xl: 'gap-12',
+}
+---
+
+<div class={`flex ${horizontal ? 'flex-row' : 'flex-col'} ${sizeMap[size]}`}>
+  <slot />
+</div>
