@@ -1,62 +1,38 @@
-import * as contentful from "contentful";
-import type { Entry, EntryFieldTypes } from "contentful"
+import * as contentful from 'contentful'
+import type { Asset, Entry, EntryFieldTypes } from 'contentful'
 
 export const contentfulClient = contentful.createClient({
   space: import.meta.env.CONTENTFUL_SPACE_ID,
   accessToken: import.meta.env.DEV
     ? import.meta.env.CONTENTFUL_PREVIEW_TOKEN
     : import.meta.env.CONTENTFUL_DELIVERY_TOKEN,
-  host: import.meta.env.DEV ? "preview.contentful.com" : "cdn.contentful.com",
-});
+  host: import.meta.env.DEV ? 'preview.contentful.com' : 'cdn.contentful.com',
+})
 
-// Asset type for images
-export interface AssetFields {
-  title: EntryFieldTypes.Text
-  description?: EntryFieldTypes.Text
-  file: {
-    url: string
-    fileName: string
-    contentType: string
-    size: number
-  }
-}
-
-// Author type
-export interface AuthorFields {
-  firstName: EntryFieldTypes.Text
-  lastName: EntryFieldTypes.Text
-  avatar: AssetFields
-}
-
-export interface AuthorSkeleton {
-  contentTypeId: "author"
-  fields: AuthorFields
-}
-
-// Article type
 export interface ArticleFields {
   slug: EntryFieldTypes.Text
   title: EntryFieldTypes.Text
   date: EntryFieldTypes.Date
   description?: EntryFieldTypes.Text
-  image?: AssetFields
-  author?: AuthorFields
+  image?: Asset
+  author?: EntryFieldTypes.Text
   readingTime?: EntryFieldTypes.Text
   page?: Entry<PageSkeleton>
   views?: EntryFieldTypes.Integer
   text?: {
-    raw: string
+    nodeType: 'document'
+    data: Record<string, never>
+    content: unknown[]
   }
 }
 
 export interface ArticleSkeleton {
-  contentTypeId: "article"
+  contentTypeId: 'article'
   fields: ArticleFields
 }
 
 export type Article = Entry<ArticleSkeleton>
 
-// Page type
 export interface PageFields {
   slug: EntryFieldTypes.Text
   title: EntryFieldTypes.Text
@@ -65,7 +41,7 @@ export interface PageFields {
 }
 
 export interface PageSkeleton {
-  contentTypeId: "page"
+  contentTypeId: 'page'
   fields: PageFields
 }
 

@@ -14,6 +14,7 @@
   "dependencies": {
     "@astrojs/react": "^5.0.1",
     "@contentful/rich-text-html-renderer": "^17.1.6",
+    "@contentful/rich-text-types": "^17.2.5",
     "@tailwindcss/vite": "^4.2.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -22,5 +23,10 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tailwindcss": "^4.2.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.1",
+    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-tailwindcss": "^0.7.2"
   }
 }

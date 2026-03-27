@@ -1,11 +1,17 @@
 ---
-import {contentfulClient, type Page} from '../../lib/contentful'
-import { renderRichText } from '../../utils/contentful'
-import Header from "../../components/Header.astro"
+import {
+  type ArticleSkeleton,
+  contentfulClient,
+  type PageSkeleton,
+} from '../../lib/contentful'
+import Header from '../../components/Header.astro'
 import Author from '../../components/Author.astro'
 import Footer from '../../components/Footer.astro'
 
-import "../../styles/global.css"
+import '../../styles/global.css'
+import { createRenderOptions } from '../../utils/contentful'
+import { documentToHtmlString } from '@contentful/rich-text-html-renderer'
+import type { Asset } from 'contentful'
 
 interface Props {
   slug: string
@@ -13,28 +19,28 @@ interface Props {
 }
 
 export async function getStaticPaths() {
-  const pagesResponse = await contentfulClient.getEntries<Page>({
+  const pagesResponse = await contentfulClient.getEntries<PageSkeleton>({
     content_type: 'page',
-    order: 'fields.position',
+    order: ['fields.position'],
   })
 
   return pagesResponse.items.flatMap((page: any) =>
-      (page.fields.articles || []).map((article: any) => ({
-        params: {
-          slug: page.fields.slug,
-          articleSlug: article.fields.slug,
-        },
-        props: {
-          slug: article.fields.slug,
-          pageSlug: page.fields.slug,
-        },
-      }))
+    (page.fields.articles || []).map((article: any) => ({
+      params: {
+        slug: page.fields.slug,
+        articleSlug: article.fields.slug,
+      },
+      props: {
+        slug: article.fields.slug,
+        pageSlug: page.fields.slug,
+      },
+    }))
   )
 }
 
 const { slug, articleSlug } = Astro.props as Props
 
-const articleResponse = await contentfulClient.getEntries({
+const articleResponse = await contentfulClient.getEntries<ArticleSkeleton>({
   content_type: 'article',
   'fields.slug': articleSlug,
   limit: 1,
@@ -50,66 +56,57 @@ const article = {
   title: articleEntry.fields.title,
   slug: articleEntry.fields.slug,
   date: articleEntry.fields.date,
-  image: articleEntry.fields.image,
+  image: articleEntry.fields.image as Asset | undefined,
   author: articleEntry.fields.author,
   text: articleEntry.fields.text,
   readingTime: articleEntry.fields.readingTime,
 }
 
-console.log(article.author)
+const richTextHtml = article.text
+  ? documentToHtmlString(article.text, createRenderOptions())
+  : ''
 
-const richTextHtml = article.text?.raw
-    ? renderRichText(JSON.parse(article.text.raw))
-    : ''
+const image = article.image as Asset | undefined
+const fileUrl = image?.fields.file?.url
 
-const imageUrl = article.image?.fields?.file?.url?.startsWith('//')
-    ? `https:${article.image.fields.file.url}`
-    : article.image?.fields?.file?.url
+const imageUrl =
+  typeof fileUrl === 'string'
+    ? fileUrl.startsWith('//')
+      ? `https:${fileUrl}`
+      : fileUrl
+    : undefined
 ---
 
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BRIID - {article.title}</title>
-  <meta name="description" content={article.title} />
-</head>
-<body>
-<section class="bg-white">
-  <Header client:load />
-  <div class="container mx-auto flex items-center flex-wrap pt-4 pb-12">
-    <div class="grid grid-cols-1 md:grid-cols-[70%_30%] gap-4 w-full">
-      <div class="px-6 flex flex-col gap-4">
-        {imageUrl && (
-            <div class="w-full">
-              <img src={imageUrl} alt={article.title} class="w-full h-auto" />
-            </div>
-        )}
-        {article.author && <Author author={article.author} client:load />}
-        <div set:html={richTextHtml} />
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BRIID - {article.title}</title>
+    <meta name="description" content={article.title} />
+  </head>
+  <body>
+    <section class="bg-white">
+      <Header client:load />
+      <div class="container mx-auto flex flex-wrap items-center pt-4 pb-12">
+        <div class="grid w-full grid-cols-1 gap-4 md:grid-cols-[70%_30%]">
+          <div class="flex flex-col gap-4 px-6">
+            {
+              imageUrl && (
+                <div class="w-full">
+                  <img
+                    src={imageUrl}
+                    alt={article.title}
+                    class="h-auto w-full"
+                  />
+                </div>
+              )
+            }
+            {article.author && <Author author={article.author} client:load />}
+            <div set:html={richTextHtml} />
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-  <Footer />
-</section>
-</body>
+      <Footer />
+    </section>
+  </body>
 </html>
-
-<!--<script>-->
-<!--  async function trackView() {-->
-<!--    try {-->
-<!--      const slug = window.location.pathname.split('/').pop()-->
-<!--      if (slug) {-->
-<!--        await fetch('/api/track-view', {-->
-<!--          method: 'POST',-->
-<!--          headers: { 'Content-Type': 'application/json' },-->
-<!--          body: JSON.stringify({ slug }),-->
-<!--        })-->
-<!--      }-->
-<!--    } catch (error) {-->
-<!--      console.error('Failed to track view:', error)-->
-<!--    }-->
-<!--  }-->
-
-<!--  trackView()-->
-<!--</script>-->

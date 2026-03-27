@@ -1,33 +1,30 @@
 ---
 export interface Author {
-    avatar: {
-        file: {
-            url: string
-        }
+  avatar: {
+    file: {
+      url: string
     }
-    firstName: string
-    lastName: string
+  }
+  firstName: string
+  lastName: string
 }
 
 interface Props {
-    author: Author
+  author: string
 }
 
 const { author } = Astro.props
 ---
 
 <div>
-    <!--<div class="flex items-center">-->
-    <!--    <img-->
-    <!--            class="w-12 h-12 rounded-full mr-4"-->
-    <!--            src={-->
-    <!--                author.avatar.file.url.startsWith('//')-->
-    <!--                    ? `https:${author.avatar.file.url}`-->
-    <!--                    : author.avatar.file.url-->
-    <!--            }-->
-    <!--            alt=""-->
-    <!--    />-->
-    <!--</div>-->
-    <!--<p>{author.firstName}</p>-->
-    <!--<p>{author.lastName}</p>-->
+  <div class="flex items-center">
+    <!--<img-->
+    <!--  class="mr-4 h-12 w-12 rounded-full"-->
+    <!--  src={author.avatar.file.url.startsWith('//')-->
+    <!--    ? `https:${author.avatar.file.url}`-->
+    <!--    : author.avatar.file.url}-->
+    <!--  alt=""-->
+    <!--/>-->
+  </div>
+  <p>{author}</p>
 </div>
