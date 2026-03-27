@@ -56,6 +56,8 @@ const article = {
   readingTime: articleEntry.fields.readingTime,
 }
 
+console.log(article.author)
+
 const richTextHtml = article.text?.raw
     ? renderRichText(JSON.parse(article.text.raw))
     : ''
@@ -83,7 +85,7 @@ const imageUrl = article.image?.fields?.file?.url?.startsWith('//')
               <img src={imageUrl} alt={article.title} class="w-full h-auto" />
             </div>
         )}
-        {article.author && <Author author={article.author.fields} client:load />}
+        {article.author && <Author author={article.author} client:load />}
         <div set:html={richTextHtml} />
       </div>
     </div>
