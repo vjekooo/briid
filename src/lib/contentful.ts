@@ -1,5 +1,6 @@
 import * as contentful from 'contentful'
 import type { Asset, Entry, EntryFieldTypes } from 'contentful'
+import type { Document } from '@contentful/rich-text-types'
 
 export const contentfulClient = contentful.createClient({
   space: import.meta.env.CONTENTFUL_SPACE_ID,
@@ -31,7 +32,18 @@ export interface ArticleSkeleton {
   fields: ArticleFields
 }
 
-export type Article = Entry<ArticleSkeleton>
+export interface Article {
+  slug: string
+  title: string
+  date: string
+  description?: string
+  image?: Asset
+  author?: string
+  readingTime?: string
+  page?: Entry<PageSkeleton>
+  views?: number
+  text?: Document
+}
 
 export interface PageFields {
   slug: EntryFieldTypes.Text

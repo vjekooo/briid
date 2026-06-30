@@ -1,65 +1,52 @@
 ---
+import type { GetStaticPaths } from 'astro'
 import {
   type ArticleSkeleton,
-  contentfulClient,
   type PageSkeleton,
+  contentfulClient,
+  type Article,
 } from '../../lib/contentful'
-import Header from '../../components/Header.astro'
-import Author from '../../components/Author.astro'
-import Footer from '../../components/Footer.astro'
 
 import '../../styles/global.css'
 import { createRenderOptions } from '../../utils/contentful'
 import { documentToHtmlString } from '@contentful/rich-text-html-renderer'
-import type { Asset } from 'contentful'
+import type { Asset, Entry } from 'contentful'
+import Header from '../../components/Header.astro'
+import Author from '../../components/Author.astro'
+import Footer from '../../components/Footer.astro'
 
-interface Props {
-  slug: string
-  articleSlug: string
-}
-
-export async function getStaticPaths() {
-  const pagesResponse = await contentfulClient.getEntries<PageSkeleton>({
-    content_type: 'page',
-    order: ['fields.position'],
+export const getStaticPaths: GetStaticPaths = async () => {
+  const articleResponse = await contentfulClient.getEntries<ArticleSkeleton>({
+    content_type: 'article',
+    include: 2,
+    limit: 1000,
   })
 
-  return pagesResponse.items.flatMap((page: any) =>
-    (page.fields.articles || []).map((article: any) => ({
-      params: {
-        slug: page.fields.slug,
-        articleSlug: article.fields.slug,
-      },
-      props: {
-        slug: article.fields.slug,
-        pageSlug: page.fields.slug,
-      },
-    }))
-  )
+  return articleResponse.items
+    .filter((entry) => entry.fields.page)
+    .map((entry) => {
+      const page = entry.fields.page as any as Entry<PageSkeleton>
+      return {
+        params: {
+          slug: page.fields.slug as string,
+          articleSlug: entry.fields.slug as string,
+        },
+        props: { articleEntry: entry.fields },
+      }
+    })
 }
 
-const { slug, articleSlug } = Astro.props as Props
-
-const articleResponse = await contentfulClient.getEntries<ArticleSkeleton>({
-  content_type: 'article',
-  'fields.slug': articleSlug,
-  limit: 1,
-})
-
-const articleEntry = articleResponse.items[0]
-
-if (!articleEntry) {
-  return Astro.redirect('/404')
-}
+const { articleEntry } = Astro.props as { articleEntry: Article }
 
 const article = {
-  title: articleEntry.fields.title,
-  slug: articleEntry.fields.slug,
-  date: articleEntry.fields.date,
-  image: articleEntry.fields.image as Asset | undefined,
-  author: articleEntry.fields.author,
-  text: articleEntry.fields.text,
-  readingTime: articleEntry.fields.readingTime,
+  title: articleEntry.title,
+  slug: articleEntry.slug,
+  date: articleEntry.date,
+  description: articleEntry.description,
+  image: articleEntry.image as Asset | undefined,
+  author: articleEntry.author,
+  text: articleEntry.text,
+  readingTime: articleEntry.readingTime,
 }
 
 const richTextHtml = article.text
@@ -75,33 +62,97 @@ const imageUrl =
       ? `https:${fileUrl}`
       : fileUrl
     : undefined
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).href
+
+const formattedDate = article.date
+  ? new Date(article.date).toISOString()
+  : undefined
+
+const metaDescription = article.description || article.title
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: article.title,
+  description: metaDescription,
+  url: canonicalUrl,
+  ...(imageUrl ? { image: imageUrl } : {}),
+  ...(formattedDate ? { datePublished: formattedDate } : {}),
+  ...(article.author
+    ? { author: { '@type': 'Person', name: article.author } }
+    : {}),
+  publisher: {
+    '@type': 'Organization',
+    name: 'BRIID',
+  },
+}
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BRIID - {article.title}</title>
-    <meta name="description" content={article.title} />
+    <title>{article.title} | BRIID</title>
+    <meta name="description" content={metaDescription} />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={article.title} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:url" content={canonicalUrl} />
+    {imageUrl && <meta property="og:image" content={imageUrl} />}
+    {
+      formattedDate && (
+        <meta property="article:published_time" content={formattedDate} />
+      )
+    }
+
+    <!-- Twitter Card -->
+    <meta
+      name="twitter:card"
+      content={imageUrl ? 'summary_large_image' : 'summary'}
+    />
+    <meta name="twitter:title" content={article.title} />
+    <meta name="twitter:description" content={metaDescription} />
+    {imageUrl && <meta name="twitter:image" content={imageUrl} />}
+
+    <!-- Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body>
     <section class="bg-white">
-      <Header client:load />
+      <Header />
+      {
+        imageUrl && (
+          <div class="w-full">
+            <img
+              src={imageUrl}
+              alt={article.title}
+              class="h-auto w-full"
+              fetchpriority="high"
+            />
+          </div>
+        )
+      }
       <div class="container mx-auto flex flex-wrap items-center pt-4 pb-12">
         <div class="grid w-full grid-cols-1 gap-4 md:grid-cols-[70%_30%]">
           <div class="flex flex-col gap-4 px-6">
+            <h1 class="h1 font-bold">{article.title}</h1>
             {
-              imageUrl && (
-                <div class="w-full">
-                  <img
-                    src={imageUrl}
-                    alt={article.title}
-                    class="h-auto w-full"
-                  />
-                </div>
+              article.date && (
+                <time datetime={formattedDate} class="text-sm text-gray-500">
+                  {new Date(article.date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </time>
               )
             }
-            {article.author && <Author author={article.author} client:load />}
+            {article.author && <Author author={article.author} />}
             <div set:html={richTextHtml} />
           </div>
         </div>

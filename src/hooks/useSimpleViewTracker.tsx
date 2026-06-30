@@ -1,13 +1,11 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 
 export const useSimpleViewTracker = (
   articleSlug: string,
-  delay: number = 60000
+  delay: number = 6000
 ) => {
-  const hasTracked = useRef(false)
-
   useEffect(() => {
-    if (!articleSlug || hasTracked.current) return
+    if (!articleSlug) return
 
     const viewedKey = `viewed_${articleSlug}`
     const lastViewed = localStorage.getItem(viewedKey)
@@ -19,23 +17,19 @@ export const useSimpleViewTracker = (
 
     const trackView = async () => {
       try {
-        hasTracked.current = true
-        localStorage.setItem(viewedKey, Date.now().toString())
-
-        const response = await fetch('/api/track-view', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ slug: articleSlug }),
-        })
+        const response = await fetch(
+          `/track-view?slug=${encodeURIComponent(articleSlug)}`,
+          {
+            method: 'GET',
+          }
+        )
 
         if (response.ok) {
+          localStorage.setItem(viewedKey, Date.now().toString())
           console.log(`View tracked for article: ${articleSlug}`)
         }
       } catch (error) {
         console.error('Error tracking view:', error)
-        hasTracked.current = false
         localStorage.removeItem(viewedKey)
       }
     }

@@ -39,13 +39,13 @@ const featuredArticles = featuredResponse.items.map((item: any) => ({
   readingTime: item.fields.readingTime,
 }))
 
-const mostReadResponse = await contentfulClient.getEntries<ArticleSkeleton>({
+const latest = await contentfulClient.getEntries<ArticleSkeleton>({
   content_type: 'article',
   limit: 3,
-  order: ['-fields.views'],
+  order: ['-fields.date'],
 })
 
-const mostReadArticles = mostReadResponse.items.map((item: any) => ({
+const latestArticles = latest.items.map((item: any) => ({
   slug: item.fields.slug,
   title: item.fields.title,
   date: item.fields.date,
@@ -109,10 +109,7 @@ const mobileLinks = pages.map((page) => ({
   </head>
   <body>
     <main>
-      <div
-        class="carousel relative container mx-auto flex flex-wrap items-center"
-        style={{ maxWidth: '1600px' }}
-      >
+      <div class="relative mx-auto flex flex-wrap items-center">
         <Header mobileLinks={mobileLinks} client:load />
         <div class="w-full">
           <Hero items={heroArticles} client:load />
@@ -144,14 +141,14 @@ const mobileLinks = pages.map((page) => ({
               <div
                 class="h5 text-xl tracking-wide text-gray-800 uppercase no-underline hover:no-underline"
               >
-                Najčitanije
+                Najnovije
               </div>
             </div>
             <div
               class="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
             >
               {
-                mostReadArticles?.map((article: any) => (
+                latestArticles?.map((article: any) => (
                   <TextCard
                     article={{
                       title: article.title,
@@ -207,7 +204,6 @@ const mobileLinks = pages.map((page) => ({
           </div>
         </div>
       </section>
-
       <Footer />
     </main>
   </body>

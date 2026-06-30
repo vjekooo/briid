@@ -32,6 +32,9 @@ importers:
       contentful:
         specifier: ^11.11.0
         version: 11.11.0
+      contentful-management:
+        specifier: ^12.0.0
+        version: 12.0.0
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -968,6 +971,10 @@ packages:
     resolution: {integrity: sha512-dnN3ibLeoRf2HNC+OlCiNc5d2zxbLJXOtiZUudNFSXZrNSydxcCsSpRzXwfu7BBWCIfHPw+xTayeBvJCP/D8Ng==}
     engines: {node: '>= 18'}
 
+  contentful-management@12.0.0:
+    resolution: {integrity: sha512-DPDcMqL1n4l5Lze+Th1pu+Zo1D3CPeLfVxXq09pLH4h9wpNpFg9/AbF2PL29iCyT5vdLWxsIxCGQEFpqcArpFg==}
+    engines: {node: '>=20'}
+
   contentful-resolve-response@1.9.8:
     resolution: {integrity: sha512-gudcrg8Z2pt+Gf76miW0ebmamLhoIZkLAadLJPO5EHeSljwnbYDawffAeqiWnd8UR5Zi+cAzcWMEBtUT9GpBpg==}
     engines: {node: '>=4.7.2'}
@@ -1199,6 +1206,10 @@ packages:
 
   github-slugger@2.0.0:
     resolution: {integrity: sha512-IaOQ9puYtjrkq7Y0Ygl9KDZnrf/aiUJYUpVf89y8kyaxbRG7Y1SrX/jaumrv81vc61+kiMempujsM3Yw7w5qcw==}
+
+  globals@15.15.0:
+    resolution: {integrity: sha512-7ACyT3wmyp3I61S4fG682L0VA2RGD9otkqGJIwNUMF1SWUombIIk+af1unuDYgMm082aHYwD+mzJvv9Iu8dsgg==}
+    engines: {node: '>=18'}
 
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
@@ -2985,6 +2996,17 @@ snapshots:
 
   common-ancestor-path@2.0.0: {}
 
+  contentful-management@12.0.0:
+    dependencies:
+      '@contentful/rich-text-types': 16.8.5
+      axios: 1.13.6
+      contentful-sdk-core: 9.4.5
+      fast-copy: 3.0.2
+      globals: 15.15.0
+      process: 0.11.10
+    transitivePeerDependencies:
+      - debug
+
   contentful-resolve-response@1.9.8:
     dependencies:
       fast-copy: 3.0.2
@@ -3224,6 +3246,8 @@ snapshots:
       es-object-atoms: 1.1.1
 
   github-slugger@2.0.0: {}
+
+  globals@15.15.0: {}
 
   gopd@1.2.0: {}
 

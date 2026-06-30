@@ -25,6 +25,12 @@
   font-family: 'BebasNeue', sans-serif;
 }
 
+@utility logo {
+  font-size: 4rem;
+  font-weight: 400;
+  font-family: 'BebasNeue', sans-serif;
+}
+
 @layer base {
   body {
     font-family: 'Abel', sans-serif;

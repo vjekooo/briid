@@ -44,7 +44,7 @@ export default function HeroSlider({ items, interval = 5000 }: Props) {
       ))}
 
       <div className="container mx-auto px-6 pb-6">
-        <div className="relative z-10 w-fit bg-white px-6 pb-4 tracking-wide transition-opacity duration-700 ease-in-out">
+        <div className="relative z-10 w-fit bg-white px-4 py-4 tracking-wide transition-opacity duration-700 ease-in-out">
           <h3 className="text-black" id="hero-name">
             {currentItem?.name}
           </h3>

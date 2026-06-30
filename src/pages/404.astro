@@ -1,29 +1,39 @@
 ---
-const title = "Not found"
+const title = 'Not found'
 ---
 
 <html lang="en">
-<head>
+  <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
-</head>
-<body>
-<main style="color:#232129; padding:96px; font-family:-apple-system, Roboto, sans-serif, serif;">
-    <h1 style="margin-top:0; margin-bottom:64px; max-width:320px;">Page not found</h1>
-    <p style="margin-bottom:48px;">
+  </head>
+  <body>
+    <main
+      style="color:#232129; padding:96px; font-family:-apple-system, Roboto, sans-serif, serif;"
+    >
+      <h1 style="margin-top:0; margin-bottom:64px; max-width:320px;">
+        Page not found
+      </h1>
+      <p style="margin-bottom:48px;">
         Sorry 😔, we couldn’t find what you were looking for.
         <br />
-        {import.meta.env.DEV ? (
-                <>
-                    <br />
-                    Try creating a page in <code style="color:#8A6534; padding:4px; background-color:#FFF4DB; font-size:1.25rem; border-radius:4px;">src/pages/</code>.
-                    <br />
-                </>
-        ) : null}
+        {
+          import.meta.env.DEV ? (
+            <>
+              <br />
+              Try creating a page in{' '}
+              <code style="color:#8A6534; padding:4px; background-color:#FFF4DB; font-size:1.25rem; border-radius:4px;">
+                src/pages/
+              </code>
+              .
+              <br />
+            </>
+          ) : null
+        }
         <br />
         <a href="/">Go home</a>.
-    </p>
-</main>
-</body>
+      </p>
+    </main>
+  </body>
 </html>
