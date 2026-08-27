@@ -39,22 +39,6 @@ const featuredArticles = featuredResponse.items.map((item: any) => ({
   readingTime: item.fields.readingTime,
 }))
 
-const latest = await contentfulClient.getEntries<ArticleSkeleton>({
-  content_type: 'article',
-  limit: 3,
-  order: ['-fields.date'],
-})
-
-const latestArticles = latest.items.map((item: any) => ({
-  slug: item.fields.slug,
-  title: item.fields.title,
-  date: item.fields.date,
-  image: item.fields.image,
-  readingTime: item.fields.readingTime,
-  page: item.fields.page,
-  views: item.fields.views,
-}))
-
 const heroArticles = featuredArticles.map((article) => ({
   title: article.title,
   url: `/${article.page.fields.slug}/${article.slug}`,
@@ -128,42 +112,6 @@ const mobileLinks = pages.map((page) => ({
                 </div>
               ))
             }
-          </div>
-        </div>
-      </section>
-
-      <section class="bg-white py-4">
-        <div class="container mx-auto pt-4">
-          <div class="top-0 px-6 py-1 md:w-2/3">
-            <div
-              class="container mx-auto mt-0 flex w-full items-center justify-between py-4"
-            >
-              <div
-                class="h5 text-xl tracking-wide text-gray-800 uppercase no-underline hover:no-underline"
-              >
-                Najnovije
-              </div>
-            </div>
-            <div
-              class="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-            >
-              {
-                latestArticles?.map((article: any) => (
-                  <TextCard
-                    article={{
-                      title: article.title,
-                      url: `/${article.page.fields.slug}/${article.slug}`,
-                      date: article.date,
-                      image: article.image?.fields?.file?.url?.startsWith('//')
-                        ? `https:${article.image.fields.file.url}`
-                        : article.image?.fields?.file?.url || '',
-                      readingTime: article.readingTime,
-                    }}
-                    client:load
-                  />
-                ))
-              }
-            </div>
           </div>
         </div>
       </section>
