@@ -3,7 +3,6 @@ import Card from '../components/Card.astro'
 import Footer from '../components/Footer.astro'
 import Header from '../components/Header.astro'
 import Hero from '../components/Hero.astro'
-import TextCard from '../components/TextCard.astro'
 import {
   type ArticleSkeleton,
   contentfulClient,
@@ -94,27 +93,11 @@ const mobileLinks = pages.map((page) => ({
   <body>
     <main>
       <div class="relative mx-auto flex flex-wrap items-center">
-        <Header mobileLinks={mobileLinks} client:load />
+        <Header mobileLinks={mobileLinks} pages={pages} client:load />
         <div class="w-full">
           <Hero items={heroArticles} client:load />
         </div>
       </div>
-
-      <section class="hidden bg-white md:block">
-        <div class="container mx-auto pt-4">
-          <div class="top-0 flex w-full gap-3 px-6 py-12">
-            {
-              pages.map((page, index) => (
-                <div class="">
-                  <a href={page.slug} class="h5 text-3xl uppercase">
-                    {page.title} {index === pages.length - 1 ? '' : '/'}
-                  </a>
-                </div>
-              ))
-            }
-          </div>
-        </div>
-      </section>
 
       <section class="bg-white">
         <div class="container mx-auto pt-4 pb-12">

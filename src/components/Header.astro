@@ -4,9 +4,13 @@ interface Props {
     title: string
     url: string
   }[]
+  slug?: string
+  pages: any[]
 }
 
-const { mobileLinks } = Astro.props
+const { slug } = Astro.props as Props
+
+const { mobileLinks, pages } = Astro.props
 ---
 
 <nav class="mt-0 flex w-full flex-wrap items-center justify-between px-6 py-6">
@@ -22,11 +26,35 @@ const { mobileLinks } = Astro.props
       <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"></path>
     </svg>
   </div>
-
-  <div class="borders-solid order-1 border-b-2 border-gray-300 md:order-2">
-    <a class="logo text-gray-800 no-underline hover:no-underline" href="/">
+  <div class="borders-solid order-1 flex gap-8 md:order-2">
+    <a
+      class="logo border-b-2 border-gray-300 text-gray-800 no-underline hover:no-underline"
+      href="/"
+    >
       BRIID
     </a>
+    <section class="hidden bg-white md:block">
+      <div class="flex h-full w-full items-center gap-3">
+        {
+          pages.map((item, index) => {
+            const cleanSlug = `/${item.slug.replace(/^\/+/, '')}`
+
+            return (
+              <div>
+                <a
+                  href={cleanSlug}
+                  class={`h5 uppercase ${
+                    slug === item.slug ? 'text-black' : 'text-gray-300'
+                  }`}
+                >
+                  {item.title} {index === pages.length - 1 ? '' : '/'}
+                </a>
+              </div>
+            )
+          })
+        }
+      </div>
+    </section>
   </div>
 
   <div
